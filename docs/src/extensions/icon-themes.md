@@ -30,7 +30,7 @@ Here is an example of the structure of an icon theme:
         "collapsed": "./icons/folder.svg",
         "expanded": "./icons/folder-open.svg"
       },
-      "chevron_icons": {
+      "chevon_icons": {
         "collapsed": "./icons/chevron-right.svg",
         "expanded": "./icons/chevron-down.svg"
       },

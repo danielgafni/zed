@@ -7,13 +7,17 @@ use std::path::{Path, PathBuf};
 use std::sync::Arc;
 
 pub use decorated_icon::*;
-use gpui::{img, svg, AnimationElement, AnyElement, Hsla, IntoElement, Rems, Transformation};
+use gpui::{img, svg, AnimationElement, Hsla, IntoElement, Rems, Transformation};
 pub use icon_decoration::*;
 use serde::{Deserialize, Serialize};
 use strum::{EnumIter, EnumString, IntoStaticStr};
 use ui_macros::DerivePathStr;
 
-use crate::{prelude::*, Indicator};
+use crate::{
+    prelude::*,
+    traits::component_preview::{ComponentExample, ComponentPreview},
+    Indicator,
+};
 
 #[derive(IntoElement)]
 pub enum AnyIcon {
@@ -66,7 +70,7 @@ pub enum IconSize {
     Medium,
     /// 48px
     XLarge,
-    Custom(Rems),
+    Custom(Pixels),
 }
 
 impl IconSize {
@@ -77,7 +81,7 @@ impl IconSize {
             IconSize::Small => rems_from_px(14.),
             IconSize::Medium => rems_from_px(16.),
             IconSize::XLarge => rems_from_px(48.),
-            IconSize::Custom(size) => size,
+            IconSize::Custom(size) => rems_from_px(size.into()),
         }
     }
 
@@ -95,7 +99,7 @@ impl IconSize {
             IconSize::Medium => DynamicSpacing::Base02.px(cx),
             IconSize::XLarge => DynamicSpacing::Base02.px(cx),
             // TODO: Wire into dynamic spacing
-            IconSize::Custom(size) => size.to_pixels(window.rem_size()),
+            IconSize::Custom(size) => px(size.into()),
         };
 
         (icon_size, padding)
@@ -222,6 +226,7 @@ pub enum IconName {
     Hash,
     HistoryRerun,
     Indicator,
+    IndicatorX,
     Info,
     InlayHint,
     Keyboard,
@@ -325,8 +330,6 @@ pub enum IconName {
     ZedAssistant2,
     ZedAssistantFilled,
     ZedPredict,
-    ZedPredictUp,
-    ZedPredictDown,
     ZedPredictDisabled,
     ZedXCopilot,
 }
@@ -362,7 +365,7 @@ impl IconSource {
     }
 }
 
-#[derive(IntoElement, IntoComponent)]
+#[derive(IntoElement)]
 pub struct Icon {
     source: IconSource,
     color: Color,
@@ -491,43 +494,25 @@ impl RenderOnce for IconWithIndicator {
     }
 }
 
-// View this component preview using `workspace: open component-preview`
 impl ComponentPreview for Icon {
-    fn preview(_window: &mut Window, _cx: &App) -> AnyElement {
-        v_flex()
-            .gap_6()
-            .children(vec![
-                example_group_with_title(
-                    "Sizes",
-                    vec![
-                        single_example("Default", Icon::new(IconName::Star).into_any_element()),
-                        single_example(
-                            "Small",
-                            Icon::new(IconName::Star)
-                                .size(IconSize::Small)
-                                .into_any_element(),
-                        ),
-                        single_example(
-                            "Large",
-                            Icon::new(IconName::Star)
-                                .size(IconSize::XLarge)
-                                .into_any_element(),
-                        ),
-                    ],
-                ),
-                example_group_with_title(
-                    "Colors",
-                    vec![
-                        single_example("Default", Icon::new(IconName::Bell).into_any_element()),
-                        single_example(
-                            "Custom Color",
-                            Icon::new(IconName::Bell)
-                                .color(Color::Error)
-                                .into_any_element(),
-                        ),
-                    ],
-                ),
-            ])
-            .into_any_element()
+    fn examples(_window: &mut Window, _cx: &mut App) -> Vec<ComponentExampleGroup<Icon>> {
+        let arrow_icons = vec![
+            IconName::ArrowDown,
+            IconName::ArrowLeft,
+            IconName::ArrowRight,
+            IconName::ArrowUp,
+            IconName::ArrowCircle,
+        ];
+
+        vec![example_group_with_title(
+            "Arrow Icons",
+            arrow_icons
+                .into_iter()
+                .map(|icon| {
+                    let name = format!("{:?}", icon).to_string();
+                    ComponentExample::new(name, Icon::new(icon))
+                })
+                .collect(),
+        )]
     }
 }

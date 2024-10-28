@@ -286,19 +286,13 @@ impl TestAppContext {
     }
 
     /// Simulates clicking a button in an platform-level alert dialog.
-    #[track_caller]
-    pub fn simulate_prompt_answer(&self, button: &str) {
-        self.test_platform.simulate_prompt_answer(button);
+    pub fn simulate_prompt_answer(&self, button_ix: usize) {
+        self.test_platform.simulate_prompt_answer(button_ix);
     }
 
     /// Returns true if there's an alert dialog open.
     pub fn has_pending_prompt(&self) -> bool {
         self.test_platform.has_pending_prompt()
-    }
-
-    /// Returns true if there's an alert dialog open.
-    pub fn pending_prompt(&self) -> Option<(String, String)> {
-        self.test_platform.pending_prompt()
     }
 
     /// All the urls that have been opened with cx.open_url() during this test.

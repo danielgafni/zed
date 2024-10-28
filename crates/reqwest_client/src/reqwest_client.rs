@@ -51,10 +51,7 @@ impl ReqwestClient {
         }) {
             client = client.proxy(proxy);
         }
-
-        let client = client
-            .use_preconfigured_tls(http_client::tls_config())
-            .build()?;
+        let client = client.build()?;
         let mut client: ReqwestClient = client.into();
         client.proxy = proxy;
         Ok(client)

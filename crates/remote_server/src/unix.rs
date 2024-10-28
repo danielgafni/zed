@@ -59,7 +59,7 @@ fn init_logging_proxy() {
 
 fn init_logging_server(log_file_path: PathBuf) -> Result<Receiver<Vec<u8>>> {
     struct MultiWrite {
-        file: std::fs::File,
+        file: Box<dyn std::io::Write + Send + 'static>,
         channel: Sender<Vec<u8>>,
         buffer: Vec<u8>,
     }
@@ -80,11 +80,14 @@ fn init_logging_server(log_file_path: PathBuf) -> Result<Receiver<Vec<u8>>> {
         }
     }
 
-    let log_file = std::fs::OpenOptions::new()
-        .create(true)
-        .append(true)
-        .open(&log_file_path)
-        .context("Failed to open log file in append mode")?;
+    let log_file = Box::new(if log_file_path.exists() {
+        std::fs::OpenOptions::new()
+            .append(true)
+            .open(&log_file_path)
+            .context("Failed to open log file in append mode")?
+    } else {
+        std::fs::File::create(&log_file_path).context("Failed to create log file")?
+    });
 
     let (tx, rx) = smol::channel::unbounded();
 

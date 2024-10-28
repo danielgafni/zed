@@ -265,8 +265,16 @@ gpui::actions!(
         Copy,
         CopyFileLocation,
         CopyHighlightJson,
+<<<<<<< HEAD
         CopyFileName,
         CopyFileNameWithoutExtension,
+||||||| parent of 673f7e3e26 (cachix and fontdb)
+        CopyFileName,
+        CopyFileNameWithoutExtension,
+        CopyPath,
+=======
+        CopyPath,
+>>>>>>> 673f7e3e26 (cachix and fontdb)
         CopyPermalinkToLine,
         Cut,
         CutToEndOfLine,
@@ -400,7 +408,6 @@ gpui::actions!(
         ToggleInlayHints,
         ToggleEditPrediction,
         ToggleLineNumbers,
-        ToggleStagedSelectedDiffHunks,
         SwapSelectionEnds,
         SetMark,
         ToggleRelativeLineNumbers,

@@ -1,9 +1,15 @@
 use std::any::{Any, TypeId};
 
 use anyhow::Result;
-use buffer_diff::BufferDiff;
 use collections::HashSet;
+<<<<<<< HEAD
 use editor::{scroll::Autoscroll, Editor, EditorEvent, ToPoint};
+||||||| parent of 673f7e3e26 (cachix and fontdb)
+use editor::{scroll::Autoscroll, Editor, EditorEvent};
+=======
+use diff::BufferDiff;
+use editor::{scroll::Autoscroll, Editor, EditorEvent};
+>>>>>>> 673f7e3e26 (cachix and fontdb)
 use feature_flags::FeatureFlagViewExt;
 use futures::StreamExt;
 use gpui::{
@@ -12,7 +18,7 @@ use gpui::{
 };
 use language::{Anchor, Buffer, Capability, OffsetRangeExt, Point};
 use multi_buffer::{MultiBuffer, PathKey};
-use project::{git::GitStore, Project, ProjectPath};
+use project::{git::GitState, Project, ProjectPath};
 use theme::ActiveTheme;
 use ui::prelude::*;
 use util::ResultExt as _;
@@ -31,7 +37,7 @@ pub(crate) struct ProjectDiff {
     editor: Entity<Editor>,
     project: Entity<Project>,
     git_panel: Entity<GitPanel>,
-    git_store: Entity<GitStore>,
+    git_state: Entity<GitState>,
     workspace: WeakEntity<Workspace>,
     focus_handle: FocusHandle,
     update_needed: postage::watch::Sender<()>,
@@ -69,7 +75,6 @@ impl ProjectDiff {
         window: &mut Window,
         cx: &mut Context<Workspace>,
     ) {
-        workspace.open_panel::<GitPanel>(window, cx);
         Self::deploy_at(workspace, None, window, cx)
     }
 
@@ -127,7 +132,6 @@ impl ProjectDiff {
                 window,
                 cx,
             );
-            diff_display_editor.set_distinguish_unstaged_diff_hunks();
             diff_display_editor.set_expand_all_diff_hunks(cx);
             diff_display_editor.register_addon(GitPanelAddon {
                 git_panel: git_panel.clone(),
@@ -137,11 +141,11 @@ impl ProjectDiff {
         cx.subscribe_in(&editor, window, Self::handle_editor_event)
             .detach();
 
-        let git_store = project.read(cx).git_store().clone();
-        let git_store_subscription = cx.subscribe_in(
-            &git_store,
+        let git_state = project.read(cx).git_state().clone();
+        let git_state_subscription = cx.subscribe_in(
+            &git_state,
             window,
-            move |this, _git_store, _event, _window, _cx| {
+            move |this, _git_state, _event, _window, _cx| {
                 *this.update_needed.borrow_mut() = ();
             },
         );
@@ -156,7 +160,7 @@ impl ProjectDiff {
 
         Self {
             project,
-            git_store: git_store.clone(),
+            git_state: git_state.clone(),
             git_panel: git_panel.clone(),
             workspace: workspace.downgrade(),
             focus_handle,
@@ -165,7 +169,7 @@ impl ProjectDiff {
             pending_scroll: None,
             update_needed: send,
             _task: worker,
-            _subscription: git_store_subscription,
+            _subscription: git_state_subscription,
         }
     }
 
@@ -175,7 +179,7 @@ impl ProjectDiff {
         window: &mut Window,
         cx: &mut Context<Self>,
     ) {
-        let Some(git_repo) = self.git_store.read(cx).active_repository() else {
+        let Some(git_repo) = self.git_state.read(cx).active_repository() else {
             return;
         };
         let repo = git_repo.read(cx);
@@ -246,7 +250,7 @@ impl ProjectDiff {
     }
 
     fn load_buffers(&mut self, cx: &mut Context<Self>) -> Vec<Task<Result<DiffBuffer>>> {
-        let Some(repo) = self.git_store.read(cx).active_repository() else {
+        let Some(repo) = self.git_state.read(cx).active_repository() else {
             self.multibuffer.update(cx, |multibuffer, cx| {
                 multibuffer.clear(cx);
             });
@@ -314,10 +318,10 @@ impl ProjectDiff {
 
         let snapshot = buffer.read(cx).snapshot();
         let diff = diff.read(cx);
-        let diff_hunk_ranges = if diff.base_text().is_none() {
+        let diff_hunk_ranges = if diff.snapshot.base_text.is_none() {
             vec![Point::zero()..snapshot.max_point()]
         } else {
-            diff.hunks_intersecting_range(Anchor::MIN..Anchor::MAX, &snapshot, cx)
+            diff.diff_hunks_intersecting_range(Anchor::MIN..Anchor::MAX, &snapshot)
                 .map(|diff_hunk| diff_hunk.buffer_range.to_point(&snapshot))
                 .collect::<Vec<_>>()
         };
@@ -331,6 +335,7 @@ impl ProjectDiff {
                 cx,
             );
         });
+<<<<<<< HEAD
         if self.multibuffer.read(cx).is_empty()
             && self
                 .editor
@@ -344,6 +349,25 @@ impl ProjectDiff {
                 editor.focus_handle(cx).focus(window);
             });
         }
+||||||| parent of 673f7e3e26 (cachix and fontdb)
+        if self.multibuffer.read(cx).is_empty()
+            && self
+                .editor
+                .read(cx)
+                .focus_handle(cx)
+                .contains_focused(window, cx)
+        {
+            self.focus_handle.focus(window);
+        } else if self.focus_handle.contains_focused(window, cx)
+            && !self.multibuffer.read(cx).is_empty()
+        {
+            self.editor.update(cx, |editor, cx| {
+                editor.focus_handle(cx).focus(window);
+                editor.move_to_beginning(&Default::default(), window, cx);
+            });
+        }
+=======
+>>>>>>> 673f7e3e26 (cachix and fontdb)
         if self.pending_scroll.as_ref() == Some(&path_key) {
             self.scroll_to_path(path_key, window, cx);
         }
@@ -374,12 +398,8 @@ impl ProjectDiff {
 impl EventEmitter<EditorEvent> for ProjectDiff {}
 
 impl Focusable for ProjectDiff {
-    fn focus_handle(&self, cx: &App) -> FocusHandle {
-        if self.multibuffer.read(cx).is_empty() {
-            self.focus_handle.clone()
-        } else {
-            self.editor.focus_handle(cx)
-        }
+    fn focus_handle(&self, _: &App) -> FocusHandle {
+        self.focus_handle.clone()
     }
 }
 
@@ -420,7 +440,7 @@ impl Item for ProjectDiff {
     }
 
     fn telemetry_event_text(&self) -> Option<&'static str> {
-        Some("Project Diff Opened")
+        Some("project diagnostics")
     }
 
     fn as_searchable(&self, _: &Entity<Self>) -> Option<Box<dyn SearchableItemHandle>> {
@@ -550,17 +570,22 @@ impl Item for ProjectDiff {
 impl Render for ProjectDiff {
     fn render(&mut self, _: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
         let is_empty = self.multibuffer.read(cx).is_empty();
-
-        div()
-            .track_focus(&self.focus_handle)
-            .bg(cx.theme().colors().editor_background)
-            .flex()
-            .items_center()
-            .justify_center()
-            .size_full()
-            .when(is_empty, |el| {
-                el.child(Label::new("No uncommitted changes"))
-            })
-            .when(!is_empty, |el| el.child(self.editor.clone()))
+        if is_empty {
+            div()
+                .bg(cx.theme().colors().editor_background)
+                .flex()
+                .items_center()
+                .justify_center()
+                .size_full()
+                .child(Label::new("No uncommitted changes"))
+        } else {
+            div()
+                .bg(cx.theme().colors().editor_background)
+                .flex()
+                .items_center()
+                .justify_center()
+                .size_full()
+                .child(self.editor.clone())
+        }
     }
 }

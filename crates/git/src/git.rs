@@ -37,9 +37,16 @@ actions!(
         // editor::RevertSelectedHunks
         StageAll,
         UnstageAll,
+<<<<<<< HEAD
         DiscardTrackedChanges,
         TrashUntrackedFiles,
         Uncommit,
+||||||| parent of 673f7e3e26 (cachix and fontdb)
+        RevertAll,
+        Uncommit,
+=======
+        RevertAll,
+>>>>>>> 673f7e3e26 (cachix and fontdb)
         Commit,
         ClearCommitMessage
     ]

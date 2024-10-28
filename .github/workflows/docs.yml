@@ -24,13 +24,11 @@ jobs:
       - name: Prettier Check on /docs
         working-directory: ./docs
         run: |
-          pnpm dlx prettier@${PRETTIER_VERSION} . --check || {
+          pnpm dlx prettier . --check || {
             echo "To fix, run from the root of the zed repo:"
-            echo "  cd docs && pnpm dlx prettier@${PRETTIER_VERSION} . --write && cd .."
+            echo "  cd docs && pnpm dlx prettier . --write && cd .."
             false
           }
-        env:
-          PRETTIER_VERSION: 3.5.0
 
       - name: Check for Typos with Typos-CLI
         uses: crate-ci/typos@8e6a4285bcbde632c5d79900a7779746e8b7ea3f # v1.24.6

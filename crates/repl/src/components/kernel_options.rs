@@ -2,7 +2,6 @@ use crate::kernels::KernelSpecification;
 use crate::repl_store::ReplStore;
 use crate::KERNEL_DOCS_URL;
 
-use gpui::AnyView;
 use gpui::DismissEvent;
 
 use gpui::FontWeight;
@@ -20,15 +19,10 @@ use ui::{prelude::*, ListItem, PopoverMenu, PopoverMenuHandle, PopoverTrigger};
 type OnSelect = Box<dyn Fn(KernelSpecification, &mut Window, &mut App)>;
 
 #[derive(IntoElement)]
-pub struct KernelSelector<T, TT>
-where
-    T: PopoverTrigger + ButtonCommon,
-    TT: Fn(&mut Window, &mut App) -> AnyView + 'static,
-{
+pub struct KernelSelector<T: PopoverTrigger> {
     handle: Option<PopoverMenuHandle<Picker<KernelPickerDelegate>>>,
     on_select: OnSelect,
     trigger: T,
-    tooltip: TT,
     info_text: Option<SharedString>,
     worktree_id: WorktreeId,
 }
@@ -50,17 +44,12 @@ fn truncate_path(path: &SharedString, max_length: usize) -> SharedString {
     }
 }
 
-impl<T, TT> KernelSelector<T, TT>
-where
-    T: PopoverTrigger + ButtonCommon,
-    TT: Fn(&mut Window, &mut App) -> AnyView + 'static,
-{
-    pub fn new(on_select: OnSelect, worktree_id: WorktreeId, trigger: T, tooltip: TT) -> Self {
+impl<T: PopoverTrigger> KernelSelector<T> {
+    pub fn new(on_select: OnSelect, worktree_id: WorktreeId, trigger: T) -> Self {
         KernelSelector {
             on_select,
             handle: None,
             trigger,
-            tooltip,
             info_text: None,
             worktree_id,
         }
@@ -246,11 +235,7 @@ impl PickerDelegate for KernelPickerDelegate {
     }
 }
 
-impl<T, TT> RenderOnce for KernelSelector<T, TT>
-where
-    T: PopoverTrigger + ButtonCommon,
-    TT: Fn(&mut Window, &mut App) -> AnyView + 'static,
-{
+impl<T: PopoverTrigger> RenderOnce for KernelSelector<T> {
     fn render(self, window: &mut Window, cx: &mut App) -> impl IntoElement {
         let store = ReplStore::global(cx).read(cx);
 
@@ -277,7 +262,7 @@ where
 
         PopoverMenu::new("kernel-switcher")
             .menu(move |_window, _cx| Some(picker_view.clone()))
-            .trigger_with_tooltip(self.trigger, self.tooltip)
+            .trigger(self.trigger)
             .attach(gpui::Corner::BottomLeft)
             .when_some(self.handle, |menu, handle| menu.with_handle(handle))
     }

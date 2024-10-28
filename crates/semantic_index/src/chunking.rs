@@ -7,7 +7,6 @@ use std::{
     path::Path,
     sync::Arc,
 };
-use streaming_iterator::StreamingIterator;
 use tree_sitter::QueryCapture;
 use util::ResultExt as _;
 
@@ -89,7 +88,7 @@ fn syntactic_ranges(
     let mut ranges = with_query_cursor(|cursor| {
         cursor
             .matches(&outline.query, tree.root_node(), text.as_bytes())
-            .filter_map_deref(|mat| {
+            .filter_map(|mat| {
                 mat.captures
                     .iter()
                     .find_map(|QueryCapture { node, index }| {

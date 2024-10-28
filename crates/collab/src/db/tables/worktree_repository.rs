@@ -15,8 +15,6 @@ pub struct Model {
     pub is_deleted: bool,
     // JSON array typed string
     pub current_merge_conflicts: Option<String>,
-    // A JSON object representing the current Branch values
-    pub branch_summary: Option<String>,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]

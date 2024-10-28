@@ -159,7 +159,7 @@ impl Render for HelloWorld {
 fn main() {
     Application::new()
         .with_assets(Assets {
-            base: PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("examples"),
+            base: PathBuf::from("crates/gpui/examples"),
         })
         .run(|cx: &mut App| {
             let bounds = Bounds::centered(None, size(px(500.0), px(500.0)), cx);
@@ -171,6 +171,5 @@ fn main() {
                 |window, cx| cx.new(|cx| HelloWorld::new(window, cx)),
             )
             .unwrap();
-            cx.activate(true);
         });
 }

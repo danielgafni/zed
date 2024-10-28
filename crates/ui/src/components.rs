@@ -29,6 +29,7 @@ mod tab;
 mod tab_bar;
 mod table;
 mod toggle;
+mod tool_strip;
 mod tooltip;
 
 #[cfg(feature = "stories")]
@@ -65,6 +66,7 @@ pub use tab::*;
 pub use tab_bar::*;
 pub use table::*;
 pub use toggle::*;
+pub use tool_strip::*;
 pub use tooltip::*;
 
 #[cfg(feature = "stories")]

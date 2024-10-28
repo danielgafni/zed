@@ -17,10 +17,16 @@ pub struct KeyBinding {
 
     /// The [`PlatformStyle`] to use when displaying this keybinding.
     platform_style: PlatformStyle,
+<<<<<<< HEAD
     size: Option<AbsoluteLength>,
 
     /// Determines whether the keybinding is meant for vim mode.
     vim_mode: bool,
+||||||| parent of 673f7e3e26 (cachix and fontdb)
+    size: Option<AbsoluteLength>,
+=======
+    size: Option<Pixels>,
+>>>>>>> 673f7e3e26 (cachix and fontdb)
 }
 
 struct VimStyle(bool);
@@ -77,8 +83,8 @@ impl KeyBinding {
     }
 
     /// Sets the size for this [`KeyBinding`].
-    pub fn size(mut self, size: impl Into<AbsoluteLength>) -> Self {
-        self.size = Some(size.into());
+    pub fn size(mut self, size: Pixels) -> Self {
+        self.size = Some(size);
         self
     }
 
@@ -134,13 +140,47 @@ impl RenderOnce for KeyBinding {
                         self.platform_style,
                         None,
                         self.size,
-                        true,
+                        false,
                     ))
                     .map(|el| el.child(self.render_key(&keystroke, None)))
             }))
     }
 }
 
+<<<<<<< HEAD
+||||||| parent of 673f7e3e26 (cachix and fontdb)
+pub fn render_key(
+    keystroke: &Keystroke,
+    platform_style: PlatformStyle,
+    color: Option<Color>,
+    size: Option<AbsoluteLength>,
+) -> AnyElement {
+    let key_icon = icon_for_key(keystroke, platform_style);
+    match key_icon {
+        Some(icon) => KeyIcon::new(icon, color).size(size).into_any_element(),
+        None => Key::new(util::capitalize(&keystroke.key), color)
+            .size(size)
+            .into_any_element(),
+    }
+}
+
+=======
+pub fn render_key(
+    keystroke: &Keystroke,
+    platform_style: PlatformStyle,
+    color: Option<Color>,
+    size: Option<Pixels>,
+) -> AnyElement {
+    let key_icon = icon_for_key(keystroke, platform_style);
+    match key_icon {
+        Some(icon) => KeyIcon::new(icon, color).size(size).into_any_element(),
+        None => Key::new(capitalize(&keystroke.key), color)
+            .size(size)
+            .into_any_element(),
+    }
+}
+
+>>>>>>> 673f7e3e26 (cachix and fontdb)
 fn icon_for_key(keystroke: &Keystroke, platform_style: PlatformStyle) -> Option<IconName> {
     match keystroke.key.as_str() {
         "left" => Some(IconName::ArrowLeft),
@@ -169,13 +209,11 @@ pub fn render_modifiers(
     modifiers: &Modifiers,
     platform_style: PlatformStyle,
     color: Option<Color>,
-    size: Option<AbsoluteLength>,
-    trailing_separator: bool,
+    size: Option<Pixels>,
+    standalone: bool,
 ) -> impl Iterator<Item = AnyElement> {
-    #[derive(Clone)]
     enum KeyOrIcon {
         Key(&'static str),
-        Plus,
         Icon(IconName),
     }
 
@@ -227,34 +265,23 @@ pub fn render_modifiers(
         .into_iter()
         .filter(|modifier| modifier.enabled)
         .collect::<Vec<_>>();
+    let last_ix = filtered.len().saturating_sub(1);
 
-    let platform_keys = filtered
+    filtered
         .into_iter()
-        .map(move |modifier| match platform_style {
-            PlatformStyle::Mac => Some(modifier.mac),
-            PlatformStyle::Linux => Some(modifier.linux),
-            PlatformStyle::Windows => Some(modifier.windows),
-        });
-
-    let separator = match platform_style {
-        PlatformStyle::Mac => None,
-        PlatformStyle::Linux => Some(KeyOrIcon::Plus),
-        PlatformStyle::Windows => Some(KeyOrIcon::Plus),
-    };
-
-    let platform_keys = itertools::intersperse(platform_keys, separator.clone());
-
-    platform_keys
-        .chain(if modifiers.modified() && trailing_separator {
-            Some(separator)
-        } else {
-            None
+        .enumerate()
+        .flat_map(move |(ix, modifier)| match platform_style {
+            PlatformStyle::Mac => vec![modifier.mac],
+            PlatformStyle::Linux if standalone && ix == last_ix => vec![modifier.linux],
+            PlatformStyle::Linux => vec![modifier.linux, KeyOrIcon::Key("+")],
+            PlatformStyle::Windows if standalone && ix == last_ix => {
+                vec![modifier.windows]
+            }
+            PlatformStyle::Windows => vec![modifier.windows, KeyOrIcon::Key("+")],
         })
-        .flatten()
         .map(move |key_or_icon| match key_or_icon {
             KeyOrIcon::Key(key) => Key::new(key, color).size(size).into_any_element(),
             KeyOrIcon::Icon(icon) => KeyIcon::new(icon, color).size(size).into_any_element(),
-            KeyOrIcon::Plus => "+".into_any_element(),
         })
 }
 
@@ -262,15 +289,14 @@ pub fn render_modifiers(
 pub struct Key {
     key: SharedString,
     color: Option<Color>,
-    size: Option<AbsoluteLength>,
+    size: Option<Pixels>,
 }
 
 impl RenderOnce for Key {
     fn render(self, _window: &mut Window, cx: &mut App) -> impl IntoElement {
         let single_char = self.key.len() == 1;
-        let size = self
-            .size
-            .unwrap_or_else(|| TextSize::default().rems(cx).into());
+        let size = self.size.unwrap_or(px(14.));
+        let size_f32: f32 = size.into();
 
         div()
             .py_0()
@@ -281,7 +307,7 @@ impl RenderOnce for Key {
                     this.px_0p5()
                 }
             })
-            .h(size)
+            .h(rems_from_px(size_f32))
             .text_size(size)
             .line_height(relative(1.))
             .text_color(self.color.unwrap_or(Color::Muted).color(cx))
@@ -298,7 +324,7 @@ impl Key {
         }
     }
 
-    pub fn size(mut self, size: impl Into<Option<AbsoluteLength>>) -> Self {
+    pub fn size(mut self, size: impl Into<Option<Pixels>>) -> Self {
         self.size = size.into();
         self
     }
@@ -308,15 +334,17 @@ impl Key {
 pub struct KeyIcon {
     icon: IconName,
     color: Option<Color>,
-    size: Option<AbsoluteLength>,
+    size: Option<Pixels>,
 }
 
 impl RenderOnce for KeyIcon {
     fn render(self, window: &mut Window, _cx: &mut App) -> impl IntoElement {
-        let size = self.size.unwrap_or(IconSize::Small.rems().into());
+        let size = self
+            .size
+            .unwrap_or(IconSize::Small.rems().to_pixels(window.rem_size()));
 
         Icon::new(self.icon)
-            .size(IconSize::Custom(size.to_rems(window.rem_size())))
+            .size(IconSize::Custom(size))
             .color(self.color.unwrap_or(Color::Muted))
     }
 }
@@ -330,7 +358,7 @@ impl KeyIcon {
         }
     }
 
-    pub fn size(mut self, size: impl Into<Option<AbsoluteLength>>) -> Self {
+    pub fn size(mut self, size: impl Into<Option<Pixels>>) -> Self {
         self.size = size.into();
         self
     }
@@ -422,6 +450,7 @@ fn keystroke_text(
     let key = match keystroke.key.as_str() {
         "pageup" => "PageUp",
         "pagedown" => "PageDown",
+<<<<<<< HEAD
         key if vim_enabled => {
             if !keystroke.modifiers.shift && key.len() == 1 {
                 key
@@ -430,11 +459,24 @@ fn keystroke_text(
             }
         }
         key => &util::capitalize(key),
+||||||| parent of 673f7e3e26 (cachix and fontdb)
+        key => &util::capitalize(key),
+=======
+        key => &capitalize(key),
+>>>>>>> 673f7e3e26 (cachix and fontdb)
     };
 
     text.push_str(key);
 
     text
+}
+
+fn capitalize(str: &str) -> String {
+    let mut chars = str.chars();
+    match chars.next() {
+        None => String::new(),
+        Some(first_char) => first_char.to_uppercase().collect::<String>() + chars.as_str(),
+    }
 }
 
 #[cfg(test)]

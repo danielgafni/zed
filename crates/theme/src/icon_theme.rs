@@ -271,17 +271,20 @@ const FILE_SUFFIXES_BY_ICON_KEY: &[(&str, &[&str])] = &[
 const FILE_ICONS: &[(&str, &str)] = &[
     ("astro", "icons/file_icons/astro.svg"),
     ("audio", "icons/file_icons/audio.svg"),
-    ("bicep", "icons/file_icons/file.svg"),
     ("bun", "icons/file_icons/bun.svg"),
     ("c", "icons/file_icons/c.svg"),
     ("code", "icons/file_icons/code.svg"),
     ("coffeescript", "icons/file_icons/coffeescript.svg"),
     ("cpp", "icons/file_icons/cpp.svg"),
+<<<<<<< HEAD
     ("crystal", "icons/file_icons/file.svg"),
     ("csharp", "icons/file_icons/file.svg"),
     ("csproj", "icons/file_icons/file.svg"),
+||||||| parent of 673f7e3e26 (cachix and fontdb)
+    ("csharp", "icons/file_icons/file.svg"),
+=======
+>>>>>>> 673f7e3e26 (cachix and fontdb)
     ("css", "icons/file_icons/css.svg"),
-    ("cue", "icons/file_icons/file.svg"),
     ("dart", "icons/file_icons/dart.svg"),
     ("default", "icons/file_icons/file.svg"),
     ("diff", "icons/file_icons/diff.svg"),
@@ -293,8 +296,13 @@ const FILE_ICONS: &[(&str, &str)] = &[
     ("eslint", "icons/file_icons/eslint.svg"),
     ("font", "icons/file_icons/font.svg"),
     ("fsharp", "icons/file_icons/fsharp.svg"),
+<<<<<<< HEAD
     ("fsproj", "icons/file_icons/file.svg"),
     ("gitlab", "icons/file_icons/settings.svg"),
+||||||| parent of 673f7e3e26 (cachix and fontdb)
+    ("gitlab", "icons/file_icons/settings.svg"),
+=======
+>>>>>>> 673f7e3e26 (cachix and fontdb)
     ("gleam", "icons/file_icons/gleam.svg"),
     ("go", "icons/file_icons/go.svg"),
     ("graphql", "icons/file_icons/graphql.svg"),
@@ -311,8 +319,6 @@ const FILE_ICONS: &[(&str, &str)] = &[
     ("lock", "icons/file_icons/lock.svg"),
     ("log", "icons/file_icons/info.svg"),
     ("lua", "icons/file_icons/lua.svg"),
-    ("luau", "icons/file_icons/file.svg"),
-    ("markdown", "icons/file_icons/book.svg"),
     ("metal", "icons/file_icons/metal.svg"),
     ("nim", "icons/file_icons/nim.svg"),
     ("nix", "icons/file_icons/nix.svg"),
@@ -330,10 +336,7 @@ const FILE_ICONS: &[(&str, &str)] = &[
     ("sass", "icons/file_icons/sass.svg"),
     ("scala", "icons/file_icons/scala.svg"),
     ("settings", "icons/file_icons/settings.svg"),
-    ("solidity", "icons/file_icons/file.svg"),
     ("storage", "icons/file_icons/database.svg"),
-    ("stylelint", "icons/file_icons/javascript.svg"),
-    ("svelte", "icons/file_icons/html.svg"),
     ("swift", "icons/file_icons/swift.svg"),
     ("tcl", "icons/file_icons/tcl.svg"),
     ("template", "icons/file_icons/html.svg"),

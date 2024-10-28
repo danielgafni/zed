@@ -4,14 +4,13 @@ use std::sync::{Arc, LazyLock};
 use anyhow::{bail, Context, Result};
 use async_trait::async_trait;
 use futures::AsyncReadExt;
-use gpui::SharedString;
 use http_client::{AsyncBody, HttpClient, HttpRequestExt, Request};
 use regex::Regex;
 use serde::Deserialize;
 use url::Url;
 
 use git::{
-    BuildCommitPermalinkParams, BuildPermalinkParams, GitHostingProvider, ParsedGitRemote,
+    BuildCommitPermalinkParams, BuildPermalinkParams, GitHostingProvider, Oid, ParsedGitRemote,
     PullRequest, RemoteUrl,
 };
 
@@ -179,7 +178,7 @@ impl GitHostingProvider for Github {
         &self,
         repo_owner: &str,
         repo: &str,
-        commit: SharedString,
+        commit: Oid,
         http_client: Arc<dyn HttpClient>,
     ) -> Result<Option<Url>> {
         let commit = commit.to_string();
