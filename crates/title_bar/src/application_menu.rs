@@ -133,14 +133,16 @@ impl ApplicationMenu {
                     .menu(move |window, cx| {
                         Self::build_menu_from_items(entry.clone(), window, cx).into()
                     })
-                    .trigger_with_tooltip(
+                    .trigger(
                         IconButton::new(
                             SharedString::from(format!("{}-menu-trigger", menu_name)),
                             ui::IconName::Menu,
                         )
                         .style(ButtonStyle::Subtle)
-                        .icon_size(IconSize::Small),
-                        Tooltip::text("Open Application Menu"),
+                        .icon_size(IconSize::Small)
+                        .when(!handle.is_deployed(), |this| {
+                            this.tooltip(Tooltip::text("Open Application Menu"))
+                        }),
                     )
                     .with_handle(handle),
             )

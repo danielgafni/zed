@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use feature_flags::ZedPro;
 use gpui::{
-    Action, AnyElement, AnyView, App, DismissEvent, Entity, EventEmitter, FocusHandle, Focusable,
+    Action, AnyElement, App, DismissEvent, Entity, EventEmitter, FocusHandle, Focusable,
     Subscription, Task, WeakEntity,
 };
 use language_model::{LanguageModel, LanguageModelAvailability, LanguageModelRegistry};
@@ -115,31 +115,20 @@ impl Render for LanguageModelSelector {
 }
 
 #[derive(IntoElement)]
-pub struct LanguageModelSelectorPopoverMenu<T, TT>
+pub struct LanguageModelSelectorPopoverMenu<T>
 where
-    T: PopoverTrigger + ButtonCommon,
-    TT: Fn(&mut Window, &mut App) -> AnyView + 'static,
+    T: PopoverTrigger,
 {
     language_model_selector: Entity<LanguageModelSelector>,
     trigger: T,
-    tooltip: TT,
     handle: Option<PopoverMenuHandle<LanguageModelSelector>>,
 }
 
-impl<T, TT> LanguageModelSelectorPopoverMenu<T, TT>
-where
-    T: PopoverTrigger + ButtonCommon,
-    TT: Fn(&mut Window, &mut App) -> AnyView + 'static,
-{
-    pub fn new(
-        language_model_selector: Entity<LanguageModelSelector>,
-        trigger: T,
-        tooltip: TT,
-    ) -> Self {
+impl<T: PopoverTrigger> LanguageModelSelectorPopoverMenu<T> {
+    pub fn new(language_model_selector: Entity<LanguageModelSelector>, trigger: T) -> Self {
         Self {
             language_model_selector,
             trigger,
-            tooltip,
             handle: None,
         }
     }
@@ -150,17 +139,13 @@ where
     }
 }
 
-impl<T, TT> RenderOnce for LanguageModelSelectorPopoverMenu<T, TT>
-where
-    T: PopoverTrigger + ButtonCommon,
-    TT: Fn(&mut Window, &mut App) -> AnyView + 'static,
-{
+impl<T: PopoverTrigger> RenderOnce for LanguageModelSelectorPopoverMenu<T> {
     fn render(self, _window: &mut Window, _cx: &mut App) -> impl IntoElement {
         let language_model_selector = self.language_model_selector.clone();
 
         PopoverMenu::new("model-switcher")
             .menu(move |_window, _cx| Some(language_model_selector.clone()))
-            .trigger_with_tooltip(self.trigger, self.tooltip)
+            .trigger(self.trigger)
             .anchor(gpui::Corner::BottomRight)
             .when_some(self.handle.clone(), |menu, handle| menu.with_handle(handle))
             .offset(gpui::Point {

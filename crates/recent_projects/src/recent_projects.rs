@@ -694,7 +694,8 @@ mod tests {
             cx.has_pending_prompt(),
             "Dirty workspace should prompt before opening the new recent project"
         );
-        cx.simulate_prompt_answer("Cancel");
+        // Cancel
+        cx.simulate_prompt_answer(0);
         assert!(
             !cx.has_pending_prompt(),
             "Should have no pending prompt after cancelling"

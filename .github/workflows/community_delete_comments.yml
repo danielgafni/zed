@@ -11,6 +11,7 @@ jobs:
   delete_comment:
     if: github.repository_owner == 'zed-industries'
     runs-on: ubuntu-latest
+    if: github.repository_owner == 'zed-industries'
     steps:
       - name: Check for specific strings in comment
         id: check_comment

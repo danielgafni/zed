@@ -738,7 +738,7 @@ impl Item for NotebookEditor {
         Label::new(title)
             .single_line()
             .color(params.text_color())
-            .when(params.preview, |this| this.italic())
+            .italic(params.preview)
             .into_any_element()
     }
 

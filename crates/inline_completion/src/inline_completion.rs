@@ -25,30 +25,18 @@ pub enum DataCollectionState {
     /// The provider doesn't support data collection.
     Unsupported,
     /// Data collection is enabled.
-    Enabled { is_project_open_source: bool },
+    Enabled,
     /// Data collection is disabled or unanswered.
-    Disabled { is_project_open_source: bool },
+    Disabled,
 }
 
 impl DataCollectionState {
     pub fn is_supported(&self) -> bool {
-        !matches!(self, DataCollectionState::Unsupported { .. })
+        !matches!(self, DataCollectionState::Unsupported)
     }
 
     pub fn is_enabled(&self) -> bool {
-        matches!(self, DataCollectionState::Enabled { .. })
-    }
-
-    pub fn is_project_open_source(&self) -> bool {
-        match self {
-            Self::Enabled {
-                is_project_open_source,
-            }
-            | Self::Disabled {
-                is_project_open_source,
-            } => *is_project_open_source,
-            _ => false,
-        }
+        matches!(self, DataCollectionState::Enabled)
     }
 }
 

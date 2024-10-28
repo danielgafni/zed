@@ -521,7 +521,6 @@ impl TitleBar {
         let branch_name = entry
             .as_ref()
             .and_then(|entry| entry.branch())
-            .map(|branch| branch.name.clone())
             .map(|branch| util::truncate_and_trailoff(&branch, MAX_BRANCH_NAME_LENGTH))?;
         Some(
             Button::new("project_branch_trigger", branch_name)
@@ -691,7 +690,7 @@ impl TitleBar {
                     })
                     .into()
                 })
-                .trigger_with_tooltip(
+                .trigger(
                     ButtonLike::new("user-menu")
                         .child(
                             h_flex()
@@ -707,8 +706,8 @@ impl TitleBar {
                                         .color(Color::Muted),
                                 ),
                         )
-                        .style(ButtonStyle::Subtle),
-                    Tooltip::text("Toggle User Menu"),
+                        .style(ButtonStyle::Subtle)
+                        .tooltip(Tooltip::text("Toggle User Menu")),
                 )
                 .anchor(gpui::Corner::TopRight)
         } else {
@@ -737,9 +736,10 @@ impl TitleBar {
                     })
                     .into()
                 })
-                .trigger_with_tooltip(
-                    IconButton::new("user-menu", IconName::ChevronDown).icon_size(IconSize::Small),
-                    Tooltip::text("Toggle User Menu"),
+                .trigger(
+                    IconButton::new("user-menu", IconName::ChevronDown)
+                        .icon_size(IconSize::Small)
+                        .tooltip(Tooltip::text("Toggle User Menu")),
                 )
         }
     }

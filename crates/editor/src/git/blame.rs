@@ -2,7 +2,7 @@ use anyhow::Result;
 use collections::HashMap;
 use git::{
     blame::{Blame, BlameEntry},
-    parse_git_remote_url, GitHostingProvider, GitHostingProviderRegistry, Oid,
+    parse_git_remote_url, GitHostingProvider, GitHostingProviderRegistry, Oid, PullRequest,
 };
 use gpui::{App, Context, Entity, Subscription, Task};
 use http_client::HttpClient;
@@ -12,10 +12,7 @@ use project::{Project, ProjectItem};
 use smallvec::SmallVec;
 use std::{sync::Arc, time::Duration};
 use sum_tree::SumTree;
-use ui::SharedString;
 use url::Url;
-
-use crate::commit_tooltip::ParsedCommitMessage;
 
 #[derive(Clone, Debug, Default)]
 pub struct GitBlameEntry {
@@ -80,11 +77,7 @@ impl GitRemote {
         self.host.supports_avatars()
     }
 
-    pub async fn avatar_url(
-        &self,
-        commit: SharedString,
-        client: Arc<dyn HttpClient>,
-    ) -> Option<Url> {
+    pub async fn avatar_url(&self, commit: Oid, client: Arc<dyn HttpClient>) -> Option<Url> {
         self.host
             .commit_author_avatar_url(&self.owner, &self.repo, commit, client)
             .await
@@ -92,11 +85,21 @@ impl GitRemote {
             .flatten()
     }
 }
+
+#[derive(Clone, Debug)]
+pub struct CommitDetails {
+    pub message: String,
+    pub parsed_message: ParsedMarkdown,
+    pub permalink: Option<Url>,
+    pub pull_request: Option<PullRequest>,
+    pub remote: Option<GitRemote>,
+}
+
 pub struct GitBlame {
     project: Entity<Project>,
     buffer: Entity<Buffer>,
     entries: SumTree<GitBlameEntry>,
-    commit_details: HashMap<Oid, crate::commit_tooltip::ParsedCommitMessage>,
+    commit_details: HashMap<Oid, CommitDetails>,
     buffer_snapshot: BufferSnapshot,
     buffer_edits: text::Subscription,
     task: Task<Result<()>>,
@@ -184,7 +187,7 @@ impl GitBlame {
         self.generated
     }
 
-    pub fn details_for_entry(&self, entry: &BlameEntry) -> Option<ParsedCommitMessage> {
+    pub fn details_for_entry(&self, entry: &BlameEntry) -> Option<CommitDetails> {
         self.commit_details.get(&entry.sha).cloned()
     }
 
@@ -477,7 +480,7 @@ async fn parse_commit_messages(
     deprecated_permalinks: &HashMap<Oid, Url>,
     provider_registry: Arc<GitHostingProviderRegistry>,
     languages: &Arc<LanguageRegistry>,
-) -> HashMap<Oid, ParsedCommitMessage> {
+) -> HashMap<Oid, CommitDetails> {
     let mut commit_details = HashMap::default();
 
     let parsed_remote_url = remote_url
@@ -516,8 +519,8 @@ async fn parse_commit_messages(
 
         commit_details.insert(
             oid,
-            ParsedCommitMessage {
-                message: message.into(),
+            CommitDetails {
+                message,
                 parsed_message,
                 permalink,
                 remote,

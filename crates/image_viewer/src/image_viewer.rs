@@ -131,7 +131,7 @@ impl Item for ImageView {
         Label::new(title)
             .single_line()
             .color(label_color)
-            .when(params.preview, |this| this.italic())
+            .italic(params.preview)
             .into_any_element()
     }
 

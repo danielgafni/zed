@@ -59,13 +59,7 @@ Alternative you can use [StyLua](https://github.com/JohnnyMorganz/StyLua):
       "formatter": {
         "external": {
           "command": "stylua",
-          "arguments": [
-            "--syntax=Lua54",
-            "--respect-ignores",
-            "--stdin-filepath",
-            "{buffer_path}",
-            "-"
-          ]
+          "arguments": ["--syntax=Lua54", "-"]
         }
       }
     }

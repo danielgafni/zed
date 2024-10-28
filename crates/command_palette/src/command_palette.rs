@@ -198,29 +198,26 @@ impl CommandPaletteDelegate {
     ) {
         self.updating_matches.take();
 
-        let mut intercept_results = CommandPaletteInterceptor::try_global(cx)
-            .map(|interceptor| interceptor.intercept(&query, cx))
-            .unwrap_or_default();
+        let mut intercept_result = CommandPaletteInterceptor::try_global(cx)
+            .and_then(|interceptor| interceptor.intercept(&query, cx));
 
         if parse_zed_link(&query, cx).is_some() {
-            intercept_results = vec![CommandInterceptResult {
+            intercept_result = Some(CommandInterceptResult {
                 action: OpenZedUrl { url: query.clone() }.boxed_clone(),
                 string: query.clone(),
                 positions: vec![],
-            }]
+            })
         }
 
-        let mut new_matches = Vec::new();
-
-        for CommandInterceptResult {
+        if let Some(CommandInterceptResult {
             action,
             string,
             positions,
-        } in intercept_results
+        }) = intercept_result
         {
             if let Some(idx) = matches
                 .iter()
-                .position(|m| commands[m.candidate_id].action.partial_eq(&*action))
+                .position(|m| commands[m.candidate_id].action.type_id() == action.type_id())
             {
                 matches.remove(idx);
             }
@@ -228,16 +225,18 @@ impl CommandPaletteDelegate {
                 name: string.clone(),
                 action,
             });
-            new_matches.push(StringMatch {
-                candidate_id: commands.len() - 1,
-                string,
-                positions,
-                score: 0.0,
-            })
+            matches.insert(
+                0,
+                StringMatch {
+                    candidate_id: commands.len() - 1,
+                    string,
+                    positions,
+                    score: 0.0,
+                },
+            )
         }
-        new_matches.append(&mut matches);
         self.commands = commands;
-        self.matches = new_matches;
+        self.matches = matches;
         if self.matches.is_empty() {
             self.selected_ix = 0;
         } else {

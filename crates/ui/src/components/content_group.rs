@@ -1,5 +1,4 @@
 use crate::prelude::*;
-use component::{example_group, single_example, ComponentPreview};
 use gpui::{AnyElement, IntoElement, ParentElement, StyleRefinement, Styled};
 use smallvec::SmallVec;
 
@@ -23,8 +22,7 @@ pub fn h_group() -> ContentGroup {
 }
 
 /// A flexible container component that can hold other elements.
-#[derive(IntoElement, IntoComponent)]
-#[component(scope = "layout")]
+#[derive(IntoElement)]
 pub struct ContentGroup {
     base: Div,
     border: bool,
@@ -88,10 +86,17 @@ impl RenderOnce for ContentGroup {
     }
 }
 
-// View this component preview using `workspace: open component-preview`
 impl ComponentPreview for ContentGroup {
-    fn preview(_window: &mut Window, _cx: &App) -> AnyElement {
-        example_group(vec![
+    fn description() -> impl Into<Option<&'static str>> {
+        "A flexible container component that can hold other elements. It can be customized with or without a border and background fill."
+    }
+
+    fn example_label_side() -> ExampleLabelSide {
+        ExampleLabelSide::Bottom
+    }
+
+    fn examples(_window: &mut Window, _: &mut App) -> Vec<ComponentExampleGroup<Self>> {
+        vec![example_group(vec![
             single_example(
                 "Default",
                 ContentGroup::new()
@@ -99,8 +104,7 @@ impl ComponentPreview for ContentGroup {
                     .items_center()
                     .justify_center()
                     .h_48()
-                    .child(Label::new("Default ContentBox"))
-                    .into_any_element(),
+                    .child(Label::new("Default ContentBox")),
             )
             .grow(),
             single_example(
@@ -111,8 +115,7 @@ impl ComponentPreview for ContentGroup {
                     .justify_center()
                     .h_48()
                     .borderless()
-                    .child(Label::new("Borderless ContentBox"))
-                    .into_any_element(),
+                    .child(Label::new("Borderless ContentBox")),
             )
             .grow(),
             single_example(
@@ -123,11 +126,10 @@ impl ComponentPreview for ContentGroup {
                     .justify_center()
                     .h_48()
                     .unfilled()
-                    .child(Label::new("Unfilled ContentBox"))
-                    .into_any_element(),
+                    .child(Label::new("Unfilled ContentBox")),
             )
             .grow(),
         ])
-        .into_any_element()
+        .grow()]
     }
 }

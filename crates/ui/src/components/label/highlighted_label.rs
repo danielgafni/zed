@@ -46,13 +46,13 @@ impl LabelCommon for HighlightedLabel {
         self
     }
 
-    fn strikethrough(mut self) -> Self {
-        self.base = self.base.strikethrough();
+    fn strikethrough(mut self, strikethrough: bool) -> Self {
+        self.base = self.base.strikethrough(strikethrough);
         self
     }
 
-    fn italic(mut self) -> Self {
-        self.base = self.base.italic();
+    fn italic(mut self, italic: bool) -> Self {
+        self.base = self.base.italic(italic);
         self
     }
 
@@ -61,8 +61,8 @@ impl LabelCommon for HighlightedLabel {
         self
     }
 
-    fn underline(mut self) -> Self {
-        self.base = self.base.underline();
+    fn underline(mut self, underline: bool) -> Self {
+        self.base = self.base.underline(underline);
         self
     }
 
@@ -73,11 +73,6 @@ impl LabelCommon for HighlightedLabel {
 
     fn single_line(mut self) -> Self {
         self.base = self.base.single_line();
-        self
-    }
-
-    fn buffer_font(mut self, cx: &App) -> Self {
-        self.base = self.base.buffer_font(cx);
         self
     }
 }

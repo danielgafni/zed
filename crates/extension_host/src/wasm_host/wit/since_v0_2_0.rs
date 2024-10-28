@@ -259,7 +259,7 @@ impl HostKeyValueStore for WasmState {
         kv_store.insert(key, value).await.to_wasmtime_result()
     }
 
-    async fn drop(&mut self, _worktree: Resource<ExtensionKeyValueStore>) -> Result<()> {
+    fn drop(&mut self, _worktree: Resource<ExtensionKeyValueStore>) -> Result<()> {
         // We only ever hand out borrows of key-value stores.
         Ok(())
     }
@@ -275,7 +275,7 @@ impl HostProject for WasmState {
         Ok(project.worktree_ids())
     }
 
-    async fn drop(&mut self, _project: Resource<Project>) -> Result<()> {
+    fn drop(&mut self, _project: Resource<Project>) -> Result<()> {
         // We only ever hand out borrows of projects.
         Ok(())
     }
@@ -325,7 +325,7 @@ impl HostWorktree for WasmState {
         Ok(delegate.which(binary_name).await)
     }
 
-    async fn drop(&mut self, _worktree: Resource<Worktree>) -> Result<()> {
+    fn drop(&mut self, _worktree: Resource<Worktree>) -> Result<()> {
         // We only ever hand out borrows of worktrees.
         Ok(())
     }
@@ -393,7 +393,7 @@ impl http_client::HostHttpResponseStream for WasmState {
         .to_wasmtime_result()
     }
 
-    async fn drop(&mut self, _resource: Resource<ExtensionHttpResponseStream>) -> Result<()> {
+    fn drop(&mut self, _resource: Resource<ExtensionHttpResponseStream>) -> Result<()> {
         Ok(())
     }
 }

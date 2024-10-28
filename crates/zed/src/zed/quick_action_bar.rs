@@ -104,7 +104,7 @@ impl Render for QuickActionBar {
             let git_blame_inline_enabled = editor.git_blame_inline_enabled();
             let show_git_blame_gutter = editor.show_git_blame_gutter();
             let auto_signature_help_enabled = editor.auto_signature_help_enabled(cx);
-            let show_edit_predictions = editor.edit_predictions_enabled();
+            let show_inline_completions = editor.should_show_inline_completions(cx);
             let inline_completion_enabled = editor.inline_completions_enabled(cx);
 
             (
@@ -114,7 +114,7 @@ impl Render for QuickActionBar {
                 git_blame_inline_enabled,
                 show_git_blame_gutter,
                 auto_signature_help_enabled,
-                show_edit_predictions,
+                show_inline_completions,
                 inline_completion_enabled,
             )
         };
@@ -168,13 +168,15 @@ impl Render for QuickActionBar {
             let focus = editor.focus_handle(cx);
 
             PopoverMenu::new("editor-selections-dropdown")
-                .trigger_with_tooltip(
+                .trigger(
                     IconButton::new("toggle_editor_selections_icon", IconName::CursorIBeam)
                         .shape(IconButtonShape::Square)
                         .icon_size(IconSize::Small)
                         .style(ButtonStyle::Subtle)
-                        .toggle_state(self.toggle_selections_handle.is_deployed()),
-                    Tooltip::text("Selection Controls"),
+                        .toggle_state(self.toggle_selections_handle.is_deployed())
+                        .when(!self.toggle_selections_handle.is_deployed(), |this| {
+                            this.tooltip(Tooltip::text("Selection Controls"))
+                        }),
                 )
                 .with_handle(self.toggle_selections_handle.clone())
                 .anchor(Corner::TopRight)
@@ -217,13 +219,15 @@ impl Render for QuickActionBar {
             let vim_mode_enabled = VimModeSetting::get_global(cx).0;
 
             PopoverMenu::new("editor-settings")
-                .trigger_with_tooltip(
+                .trigger(
                     IconButton::new("toggle_editor_settings_icon", IconName::Sliders)
                         .shape(IconButtonShape::Square)
                         .icon_size(IconSize::Small)
                         .style(ButtonStyle::Subtle)
-                        .toggle_state(self.toggle_settings_handle.is_deployed()),
-                    Tooltip::text("Editor Controls"),
+                        .toggle_state(self.toggle_settings_handle.is_deployed())
+                        .when(!self.toggle_settings_handle.is_deployed(), |this| {
+                            this.tooltip(Tooltip::text("Editor Controls"))
+                        }),
                 )
                 .anchor(Corner::TopRight)
                 .with_handle(self.toggle_settings_handle.clone())
